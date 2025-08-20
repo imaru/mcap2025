@@ -12,14 +12,14 @@ rm(list = ls())
 jntn<-c('Head','Neck','rSldr','rElbw','rWrst','lSldr','lElbw','lWrst','Wst','rHip','rknee','rAnkl','lHip','lKnee','lAnkl','rEye','lEye','rEar','lEar','lToe','lHeel','rToe','rHeel')
 fr<-30
 
-showfig<-FALSE
-savefig<-FALSE
+showfig<-TRUE
+savefig<-TRUE
 
 # ここからの6行を変更する必要がある
 ff<-choose.files()
 xwid<-320 # 動画の縦サイズ
 ywid<-568 # 動画の横サイズ
-height<-180 # 被写体の身長
+height<-170 # 被写体の身長
 jd<-choose.dir() # データが入っているフォルダ名
 begT<-0 # 解析開始時間（秒）、0の場合は最初から
 durT<-0 # 解析時間の長さ（秒）、0の場合は最後まで。
@@ -76,7 +76,7 @@ for (i in 1:nf){
     plot3d(xs,ys,zs, size = 5, add=T, na.rm=T)
     box3d()
     if (savefig)
-    rgl.snapshot( fmt="png", sprintf("movfig\\pose%05d.png", i)  )
+    rgl.snapshot( fmt="png", sprintf("mpfig\\pose%05d.png", i)  )
     # ffmpeg -r 50 -i ./pose%05d.png -pix_fmt yuv420p -vcodec libx264 ./pose.mp4
     next3d()
   }
