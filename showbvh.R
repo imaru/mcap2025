@@ -24,6 +24,9 @@ jnts <- c(11 ,16, 21)
 # for (i in 1:length(dat$Joints)){
 #   print(dat$Joints[[i]]$Name)
 # }
+
+
+
 ldat<-data.frame()
 for (ff in 1:dat$Frames){
   xs<-NULL
@@ -65,3 +68,5 @@ for (i in 1:length(jnts)){
   g[[i]]<-g[[i]]+labs(title=dat$Joints[[jnts[i]]]$Name)
 }
 wrap_plots(g)+plot_layout(ncol=1)
+
+
