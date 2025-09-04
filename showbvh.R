@@ -1,5 +1,5 @@
-install.packages("remotes")
-remotes::install_github("browarsoftware/RMoCap")
+# install.packages("remotes")
+# remotes::install_github("browarsoftware/RMoCap")
 
 library(RMoCap)
 library(rgl)
@@ -11,7 +11,7 @@ fl<-choose.files()
 dat<-read.bvh(fl)
 
 showfig<-TRUE
-savefig<-TRUE
+savefig<-FALSE
 
 # 1 "root" 2 "torso_1" 3 "torso_2" 4 "torso_3" 5 "torso_4" 6 "torso_5" 7 "torso_6" 8 "torso_7"
 # 9 "neck_1" 10 "neck_2" 11 "head" 12 "EndSite12" 13 "l_shoulder" 14 "l_up_arm" 15 "l_low_arm" 16 "l_hand"
