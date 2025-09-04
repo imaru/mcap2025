@@ -6,11 +6,13 @@ library(rgl)
 library(htmltools)
 library(ggplot2)
 library(patchwork)
+library(tidyverse)
+library(zoo)
 
 fl<-choose.files()
 dat<-read.bvh(fl)
 
-showfig<-TRUE
+showfig<-FALSE
 savefig<-FALSE
 
 # 1 "root" 2 "torso_1" 3 "torso_2" 4 "torso_3" 5 "torso_4" 6 "torso_5" 7 "torso_6" 8 "torso_7"
@@ -21,13 +23,19 @@ savefig<-FALSE
 
 jnts <- c(11 ,16, 21)
 
-# for (i in 1:length(dat$Joints)){
-#   print(dat$Joints[[i]]$Name)
-# }
+jntname<-sapply(dat$Joints,function(x){return(x$Name)})
 
-
+# extdat<-lapply(dat$Joints, function(x){
+#   if (x$Parent>0){
+#     print(c(dat$Joints[x$Parents]$Dxyz, x$Dxyz))
+#   }
+#   }
+# )
 
 ldat<-data.frame()
+dist<-data.frame(matrix(NA,nrow=dat$Frames, ncol=length(dat$Joints)))
+pxyz<-matrix(nrow=length(dat$Joints), ncol=3)
+nxyz<-matrix(nrow=length(dat$Joints), ncol=3)
 for (ff in 1:dat$Frames){
   xs<-NULL
   ys<-NULL
@@ -35,6 +43,7 @@ for (ff in 1:dat$Frames){
   for (i in 1:length(dat$Joints)){
     #for (i in 1:10){
     #print(paste(as.character(i), dat$Joints[[i]]$Name))
+    nxyz[i,]<-dat$Joints[[i]]$Dxyz[ff,]
     if (dat$Joints[[i]]$Parent>0 & dat$Joints[[i]]$Nchannels>0){
       xs<-c(xs, dat$Joints[[dat$Joints[[i]]$Parent]]$Dxyz[ff,1])
       ys<-c(ys, dat$Joints[[dat$Joints[[i]]$Parent]]$Dxyz[ff,2])
@@ -45,7 +54,9 @@ for (ff in 1:dat$Frames){
       ldat<-rbind(ldat, c(dat$Joints[[i]]$Name,ff,'x',dat$Joints[[i]]$Dxyz[ff,1]))
       ldat<-rbind(ldat, c(dat$Joints[[i]]$Name,ff,'y',dat$Joints[[i]]$Dxyz[ff,2]))
       ldat<-rbind(ldat, c(dat$Joints[[i]]$Name,ff,'z',dat$Joints[[i]]$Dxyz[ff,3]))
+      dist[ff,i]<-sqrt(sum((nxyz[i,]-pxyz[i,])^2))
     }
+    pxyz[i,]<-nxyz[i,]
   }
   if (showfig){
     rgl::view3d(-25, 15, 40)
@@ -61,12 +72,31 @@ for (ff in 1:dat$Frames){
 }
 
 colnames(ldat)<-c('name','frame','axis','value')
+rdist<-rollmean(dist, 1/dat$FrameTime)
+rdist<-data.frame(cbind(1:dat$Frames,rdist))
+rdist[2,]<-NA
 
-g<-list()
-for (i in 1:length(jnts)){
-  g[[i]]<-ggplot(data=ldat[which(ldat$name==dat$Joints[[jnts[i]]]$Name),],aes(x=as.numeric(frame)*dat$FrameTime, y=as.numeric(value), color=axis))+geom_line(linewidth=1)
-  g[[i]]<-g[[i]]+labs(title=dat$Joints[[jnts[i]]]$Name)
+
+
+colnames(rdist)<-c('frame',jntname)
+
+ldist<-pivot_longer(rdist, cols = -frame)
+
+wdat<-pivot_wider(ldat, names_from = c(name,axis), values_from=value) 
+
+
+# g<-list()
+# for (i in 1:length(jnts)){
+#   g[[i]]<-ggplot(data=ldat[which(ldat$name==dat$Joints[[jnts[i]]]$Name),],aes(x=as.numeric(frame)*dat$FrameTime, y=as.numeric(value), color=axis))+geom_line(linewidth=1)
+#   g[[i]]<-g[[i]]+labs(title=dat$Joints[[jnts[i]]]$Name)
+# }
+# wrap_plots(g)+plot_layout(ncol=1)
+
+gd<-list()
+for (j in 1:length(jnts)){
+  gd[[j]]<-ggplot(data=ldat[which(ldat$name==dat$Joints[[jnts[j]]]$Name),],aes(x=as.numeric(frame)*dat$FrameTime, y=as.numeric(value), color=axis))+geom_line(linewidth=1)
+  gd[[j]]<-gd[[j]]+labs(title=dat$Joints[[jnts[j]]]$Name)
+  gd[[j+length(jnts)]]<-ggplot(data=ldist[which(ldist$name==dat$Joints[[jnts[j]]]$Name),], aes(x=frame*dat$FrameTime, y=value))+geom_line(linewidth=1)
+  gd[[j+length(jnts)]]<-gd[[j+length(jnts)]]+labs(title=dat$Joints[[jnts[j]]]$Name)+ylim(c(0,max(rdist[,2:ncol(rdist)], na.rm = T)))
 }
-wrap_plots(g)+plot_layout(ncol=1)
-
-
+wrap_plots(gd)+plot_layout(ncol=length(jnts))
