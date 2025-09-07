@@ -1,6 +1,8 @@
 # install.packages("remotes")
 # remotes::install_github("browarsoftware/RMoCap")
 
+rm(list=ls())
+
 library(RMoCap)
 library(rgl)
 library(htmltools)
@@ -21,7 +23,7 @@ savefig<-FALSE
 # 23 "l_up_leg" 24 "l_low_leg" 25 "l_foot" 26 "l_toes" 27 "EndSite27"
 # 28 "r_up_leg" 29 "r_low_leg" 30 "r_foot" 31 "r_toes" 32 "EndSite32"
 
-jnts <- c(11 ,16, 21)
+jnts <- c(13, 26, 31)
 
 jntname<-sapply(dat$Joints,function(x){return(x$Name)})
 
