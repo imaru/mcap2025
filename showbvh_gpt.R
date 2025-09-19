@@ -20,7 +20,7 @@ fl <- choose.files()  # 結果ファイルの選択
 dat <- RMoCap::read.bvh(fl)  # データ読み込み
 
 showfig <- TRUE  # FALSEにすると棒人間を表示しない
-savefig <- FALSE  # TRUEにすると棒人間の静止画ファイルを保存する
+savefig <- FALSE  # TRUEにすると棒人間の静止画ファイルを保存する, 保存する場合tempというフォルダを作っておく必要がある
 
 # ---- 0) メタ情報 ----
 J <- length(dat$Joints)       # 記録されている関節の数
